@@ -1,0 +1,17 @@
+{
+    "name": "caps",
+    "version": "1.0.0",
+    "description": "Events Lab 11",
+    "main": "main.js",
+    "scripts": {
+        "start": "node main.js",
+        "test": "jest --watch test.js"
+    },
+    "author": "justin Mathieu",
+    "license": "ISC",
+    "dependencies": {
+        "@types/node": "^18.7.3",
+        "chance": "^1.1.8",
+        "jest": "^28.1.3"
+    }
+}
