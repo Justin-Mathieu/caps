@@ -16,3 +16,8 @@ App to track the delivery of packages with event listeners.
 ## UML
 
 ![Caps UML](./img/caps-uml.png)
+
+
+### Collaborators
+
+- Ryan Juve  
