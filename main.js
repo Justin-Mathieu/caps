@@ -1,19 +1,30 @@
-const event = require('./event.js');
+const { Server } = require('socket.io');
+const io = new Server(3001);
 
-const { vendorPackageReady, handleVendorDelivery } = require('./vendor');
-const { handlePackageReady, handleDriverPickup, handleDriverDelivery } = require('./driver');
-
-function setupListeners() {
+// function setUp() {
+io.on('connection', (client) => {
     // start, vendor says its ready
-    event.addListener('vendor package ready', handlePackageReady)
-    // driver pick up package
-    event.addListener('driver pickup package', handleDriverPickup)
-    // driver deliver
-    event.addListener('driver delivery', handleDriverDelivery)
-    // vendor acknowledge delivery
-    event.addListener('vendor delivery', handleVendorDelivery)
-}
+    client.on('vendor package ready', (parcel) => {
+        console.log('first emit: ', parcel);
+        io.emit('pickup', parcel);
 
-setupListeners();
+    });
 
-vendorPackageReady();
+
+    client.on('picked up', (parcel) => {
+        console.log(parcel)
+        io.emit('delivered', parcel)
+    });
+
+
+    client.on('driver delivered', (parcel) => {
+        console.log(parcel)
+        io.emit('vendor delivery notice', parcel)
+    });
+
+
+})
+// }
+
+// setUp();
+

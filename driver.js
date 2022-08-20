@@ -1,24 +1,25 @@
-const event = require('./event.js');
+const { io } = require("socket.io-client");
+const socket = io("ws://localhost:3001");
 
-function handlePackageReady(parcel) {
-    console.log(parcel)
-    event.emit('driver pickup parcel', parcel)
-}
 
-function handleDriverPickup(parcel) {
+
+socket.on('pickup', (parcel) => {
+    console.log('pickup emit')
     parcel.event = "in transit"
     parcel.time = Date(Date.now());
     console.log(`DRIVER: Order ${parcel.payload.orderId} has been picked up`)
-    console.log(parcel);
-    event.emit('driver delivery ', parcel);
-}
+    socket.emit('picked up', parcel);
 
-function handleDriverDelivery(parcel) {
-    parcel.time = Date(Date.now())
-    parcel.event = "Delivered"
+
+});
+
+
+
+socket.on('delivered', (parcel) => {
+    parcel.event = "delivered"
+    parcel.time = Date(Date.now());
     console.log(`DRIVER: Order ${parcel.payload.orderId} has been delivered`)
+    socket.emit('driver delivered', parcel);
+});
 
-    event.emit('vendor delivery', parcel);
-}
 
-module.exports = { handlePackageReady, handleDriverPickup, handleDriverDelivery };

@@ -1,4 +1,6 @@
-const event = require('./event.js')
+const { io } = require("socket.io-client");
+const socket = io("ws://localhost:3001");
+
 const Chance = require('chance');
 const chance = new Chance();
 
@@ -16,15 +18,21 @@ function buildPackage() {
     }
 }
 
+
+
 function vendorPackageReady() {
     const packageToSend = buildPackage();
-    event.emit('vendor package ready', packageToSend);
+    socket.timeout(2000).emit('vendor package ready', packageToSend);
     // console.log(`EVENT: ${packageToSend}`)
 }
 
-function handleVendorDelivery(parcel) {
+socket.on('vendor delivery notice', (parcel) => {
     console.log(`VENDOR: Thank you for delivering ${parcel.payload.orderId}`)
-    console.log(parcel);
-}
+})
 
-module.exports = { vendorPackageReady, handleVendorDelivery, buildPackage };
+
+
+vendorPackageReady()
+
+
+module.exports = { buildPackage };
