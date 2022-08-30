@@ -2,37 +2,35 @@ const { io } = require("socket.io-client");
 const socket = io("ws://localhost:3001");
 
 const Chance = require('chance');
+const { buildPackage } = require("./handlers");
 const chance = new Chance();
 
-function buildPackage() {
-    return {
-        event: "pickup ready",
-        time: Date(Date.now()),
-        payload: {
-            store: chance.animal() + " INC",
-            orderId: chance.bb_pin(),
-            customerName: chance.name({ nationality: "en" }),
-            address: chance.address(),
-
-        }
-    }
-}
-
-
-
-function vendorPackageReady() {
-    const packageToSend = buildPackage();
-    socket.timeout(2000).emit('vendor package ready', packageToSend);
-    // console.log(`EVENT: ${packageToSend}`)
-}
-
-socket.on('vendor delivery notice', (parcel) => {
-    console.log(`VENDOR: Thank you for delivering ${parcel.payload.orderId}`)
+//recieve start signal -> send packages
+socket.on('connect', () => {
+    interval = setInterval(() => {
+        let parcel1 = buildPackage('acme-widgets')
+        socket.emit('vendor package ready', parcel1);
+    }, 10000)
+    setTimeout(() => {
+        interval2 = setInterval(() => {
+            let parcel2 = buildPackage('1-800-flowers')
+            socket.emit('vendor package ready', parcel2);
+        }, 10000)
+    }, 30000)
 })
 
 
 
-vendorPackageReady()
+//Recieves history of deliveries
+socket.on('Log of deliveries', (log) => {
+    console.log(log)
+})
 
 
-module.exports = { buildPackage };
+//recieve confirmation archive package
+socket.on('vendor confirmation', (message) => {
+    console.log(message)
+});
+
+
+
