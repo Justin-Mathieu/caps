@@ -1,7 +1,7 @@
 
 const Events = require('events')
-const events = new Events();
+const event = new Events();
 
-module.exports = events
+module.exports = event
 
 

@@ -14,12 +14,14 @@ function buildPackage() {
 
         }
     }
+
 }
 
 function vendorPackageReady() {
     const packageToSend = buildPackage();
+
     event.emit('vendor package ready', packageToSend);
-    // console.log(`EVENT: ${packageToSend}`)
+
 }
 
 function handleVendorDelivery(parcel) {
