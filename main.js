@@ -1,9 +1,9 @@
 const { Server } = require('socket.io');
 const { Socket } = require('socket.io-client');
-const io = new Server(3001);
-const { PackageRequest } = require('./handlers')
+const { io } = require("socket.io-client");
+const { PackageRequest } = require('./handlers');
 
-
+//TODO: Add rooms
 
 //Queues
 const requestQueue = [];
@@ -46,6 +46,7 @@ io.on('connection', (client) => {
 
     //driver has delivered package -> remove it fromn queue and add it to history -> send confirmation message
     client.on('driver delivered', (parcel) => {
+        console.log(parcel)
         deliveredLog.push({
             "Order": parcel.payload.orderId,
             "Status": parcel.status,

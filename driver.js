@@ -10,7 +10,7 @@ socket.on('connect', () => {
     interval = setInterval(() => {
         let driver = driverBuild()
         driverRoster.push(driver);
-        console.log(driverRoster)
+        // console.log(driverRoster)
     }, 1000)
 
 })
