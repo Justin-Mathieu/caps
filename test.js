@@ -1,5 +1,5 @@
 const event = require('./event.js');
-const { driverBuild, buildPackage } = require('./handlers.js');
+const { driverBuild, buildPackage } = require('./server/handlers.js');
 const { io } = require("socket.io-client");
 const socket = io("ws://localhost:3001");
 
