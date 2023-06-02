@@ -2,7 +2,7 @@ const { io } = require("socket.io-client");
 const socket = io("ws://localhost:3001");
 
 const Chance = require('chance');
-const { buildPackage } = require("./handlers");
+const { buildPackage } = require("../server/handlers");
 const chance = new Chance();
 
 //recieve start signal -> send packages

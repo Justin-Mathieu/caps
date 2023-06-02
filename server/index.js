@@ -1,18 +1,23 @@
-const { Server } = require('socket.io');
-const { Socket } = require('socket.io-client');
-const { io } = require("socket.io-client");
-const { PackageRequest } = require('./handlers');
+'use strict';
 
-//TODO: Add rooms
+require('dotenv').config();
+const { Server } = require('socket.io');
+const PORT = process.env.PORT || 3001;
+const Queue = require('./queue');
+const server = new Server();
+
+
+server.listen(PORT);
 
 //Queues
-const requestQueue = [];
-const deliveredLog = [];
+const requestQueue = new Queue;
+const deliveredLog = new Queue;
+
+const caps = server.of('/caps');
 
 
-
-io.on('connection', (client) => {
-    // Send the histroy of delivered packages
+caps.on('connection', (client) => {
+    console.log('connected: ', client.id)
 
     client.emit('Log of deliveries', deliveredLog)
 
