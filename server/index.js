@@ -2,67 +2,86 @@
 
 require('dotenv').config();
 const { Server } = require('socket.io');
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 const Queue = require('./queue');
+const { Socket } = require('socket.io-client');
+;
 const server = new Server();
 
 
 server.listen(PORT);
 
 //Queues
-const requestQueue = new Queue;
-const deliveredLog = new Queue;
+const capsQ = new Queue()
 
+//NameSpace
 const caps = server.of('/caps');
 
 
 caps.on('connection', (client) => {
-    console.log('connected: ', client.id)
 
-    client.emit('Log of deliveries', deliveredLog)
+    console.log('connected to name space: ', client.id)
 
+    // ROOMS 
+    client.on('join', (room) => {
+        client.join(room);
+        console.log(`${client.id} is Joining room: ${room}`)
+    });
 
+    // LOGGER
+    client.onAny((event, parcel) => {
+        let time = Date(Date.now());
+        console.log(event, time);
+    });
 
-    // recieve the vendor package -> send the confirmation and add it to the queue
-    client.on('vendor package ready', (parcel) => {
-        requestQueue.push(parcel);
-        console.log(requestQueue)
-        const message = `Your request has been recieved. Your tracking number is(${parcel.payload.orderId})`
-        for (let i = 0; i < requestQueue.length; i++) {
-            io.emit('vendor confirmation', message)
-            io.emit('pickup request', requestQueue[i]);
+    //PICKUP
+    client.on('pickup', (parcel) => {
+        let driverQ = capsQ.read('driver');
+        if (!driverQ) {
+            let driverKey = capsQ.add('driver', new Queue());
+            driverQ = capsQ.read(driverKey)
         }
+        driverQ.add(parcel.payload.orderID, parcel);
+        client.broadcast.emit('pickup', parcel);
+    });
 
+    //IN-TRANSIT
+    client.on('in-transit', (parcel) => {
+        client.broadcast.emit('in-transit', parcel)
+    });
+
+    // DELIVERED
+    client.on('delivered', (parcel) => {
+        let vendorQ = capsQ.read(parcel.vendorID);
+        if (!vendorQ) {
+            let vendorkey = capsQ.add(parcel.vendorID, new Queue());
+            vendorQ = capsQ.read(vendorkey)
+        }
+        vendorQ.add(parcel.payload.orderID, parcel)
+        client.broadcast.emit('delivered', parcel);
+    });
+
+    //GETALL
+    client.on('getAll', (parcel) => {
+        let currentQ = capsQ.read(parcel.vendorID);
+        if (currentQ && currentQ.data) {
+            const ID = Object.keys(currentQ.data);
+            ID.forEach(messageId => {
+                let storedParcel = currentQ.read(messageId);
+                client.emit(storedParcel.event, storedParcel);
+            })
+        }
+    });
+
+    //RECIEVED
+    client.on('recieved', (parcel) => {
+        let currentQ = capsQ.read(parcel.vendorID);
+        if (!currentQ) {
+            throw new Error('NO QUEUE!')
+        }
+        currentQ.remove(parcel.orderID)
     })
 
-
-
-
-
-
-    //driver picked up package and is in transit.
-    client.on('picked up', (parcel) => {
-        console.log(parcel)
-        const message = (` your order (${parcel.payload.orderId}) has been picked up for delivery on:${parcel.time} by ${parcel.payload.driver}`)
-        io.emit('vendor confirmation', message)
-        io.emit('delivered', parcel)
-    });
-
-
-    //driver has delivered package -> remove it fromn queue and add it to history -> send confirmation message
-    client.on('driver delivered', (parcel) => {
-        console.log(parcel)
-        deliveredLog.push({
-            "Order": parcel.payload.orderId,
-            "Status": parcel.status,
-            "Driver": parcel.payload.driver
-
-        })
-        const message = (`Your package(${parcel.payload.orderId}) has been delivered at ${parcel.time} by ${parcel.payload.driver}`)
-        io.emit('vendor confirmation', message)
-        requestQueue.shift()
-
-    });
-
-
 });
+
+console.log('SERVER PORT: ', PORT)
