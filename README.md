@@ -1,7 +1,7 @@
 # Code Academy Parcel Service
 
 **Description:**
-App to track the delivery of packages with event listeners.
+App to track the delivery of packages with socket io.
 
 **Author:**
  Justin Mathieu
@@ -20,4 +20,5 @@ App to track the delivery of packages with event listeners.
 
 ### Collaborators
 
+- 401d53 demo/code review
 - Ryan Juve  
