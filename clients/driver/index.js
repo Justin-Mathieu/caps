@@ -1,7 +1,16 @@
 const { io } = require("socket.io-client");
-const socket = io("ws://localhost:3001");
-const { driverMessages, driverPickup } = require('./handler');
+const client = io('http://localhost:3002/caps');
+const { handlePickup, handleDelivery } = require('./handler');
 
-socket.on('connect', driverMessages())
-socket.on('pickup request', driverPickup(parcel));
-socket.on('delivered', driverDeliver(parcel));
+client.emit('getAll', { vendorID: 'driver' });
+
+client.on('pickup', (parcel) => {
+    setTimeout(() => {
+        handlePickup(client, parcel);
+    }, 5000);
+
+    setTimeout(() => {
+        handleDelivery(client, parcel);
+    }, 1000);
+    client.emit('recieved', { vendorID: 'driver', orderID: parcel.payload.orderID });
+});

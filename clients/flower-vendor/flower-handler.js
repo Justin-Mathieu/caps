@@ -1,11 +1,11 @@
 const Chance = require('chance');
 const chance = new Chance();
-const store = 'acme-widgets'
+const store = '1-206-flowers';
 
 function handleOrder(client, parcel = null) {
     if (!parcel) {
         parcel = {
-            status: "pickup ready",
+            event: "pickup ready",
             time: Date(Date.now()),
             payload: {
                 vendorID: store,
@@ -22,7 +22,7 @@ function handleOrder(client, parcel = null) {
 }
 
 function handleThankyou(parcel) {
-    console.log(`VENDOR: Thank you for your order ${parcel.payload.orderID}`)
+    console.log(`VENDOR: thank you for your order ${parcel.payload.orderID}`)
 }
 
 module.exports = { handleOrder, handleThankyou };
